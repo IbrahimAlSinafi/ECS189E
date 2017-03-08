@@ -84,6 +84,16 @@ public class StudentTestCases {
         assertTrue(this.instructor.homeworkExists("Test", 2017, "hw3"));
     }
 
+    @Test
+    public void submitHW6(){
+        this.admin.createClass("Test", 2017, "Instructor", 22);
+        this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
+        this.student.submitHomework();
+        assertTrue(this.student.hasSubmitted());
+    }
+
+
     //the class is taught in the past year
     @Test
     public void submitHW2(){
@@ -98,8 +108,9 @@ public class StudentTestCases {
     public void submitHW3(){
         this.admin.createClass("Test", 2017, "Instructor", 22);
         this.student.registerForClass("Student", "Test", 2017);
+        this.student.submitHomework();
         //this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
-        assertFalse(this.instructor.homeworkExists("Test", 2017, "hw3"));
+        assertFalse(this.student.hasSubmitted()));
     }
 
     //student is not register for the class
@@ -108,6 +119,7 @@ public class StudentTestCases {
         this.admin.createClass("Test", 2017, "Instructor", 22);
         //this.student.registerForClass("Student", "Test", 2017);
         this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
-        assertFalse(! this.instructor.homeworkExists("Test", 2017, "hw3"));
+        this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
+        assertFalse(! this.student.hasSubmitted("Student", "hw3", "Test", 2017));
     }
 }

@@ -84,7 +84,8 @@ public class InstructorTestCases {
         this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
         this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", -1);
         grade = this.instructor.getGrade("Test", 2017, "hw3", "Student");
-        assertFalse("grade can't be negative", grade < 0);
+        assertNull(grade);
+        //assertFalse("grade can't be negative", grade < 0);
     }
 
     //Student graded on the hw
@@ -132,6 +133,7 @@ public class InstructorTestCases {
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
         this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
+        this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", 10);
         assertNull(this.instructor.getGrade("Test", 2017, "hw3", "Student"));
     }
 }
