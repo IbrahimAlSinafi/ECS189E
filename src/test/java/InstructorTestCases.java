@@ -10,7 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Created by Ibrahim on 3/3/17.
+ * Created by Ibrahim on 3/3/17
  */
 public class InstructorTestCases {
     private IInstructor instructor;
