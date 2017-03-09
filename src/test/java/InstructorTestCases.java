@@ -29,7 +29,6 @@ public class InstructorTestCases {
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
         InstructorName = this.admin.getClassInstructor("Test", 2017);
-        //System.out.println(InstructorName.contentEquals("Instructor"));
         assertTrue(InstructorName.contentEquals("Instructor"));
     }
 
@@ -41,37 +40,67 @@ public class InstructorTestCases {
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
         InstructorName = this.admin.getClassInstructor("Test", 2017);
-        //System.out.println(InstructorName.contentEquals("Ibrahim"));
         assertFalse(InstructorName.contentEquals("Ibrahim"));
     }
 
-    //provided this instructor has been assigned to this class,
-    //the homework has been assigned and the student has submitted this homework.
+    //base case
     @Test
-    public void HWAdded1(){
-        boolean bool = true;
-        String InstructorName = "";
+    public void assignHW(){
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
-        InstructorName = this.admin.getClassInstructor("Test", 2017);
-        this.instructor.addHomework(InstructorName, "Test", 2017, "hw3", "Programming");
-        bool = this.student.hasSubmitted("Student", "hw3", "Test", 2017);
-        assertTrue(bool);
+        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
+        this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
+        assertTrue(this.instructor.homeworkExists("Test", 2017, "hw3"));
     }
 
-    //provided this instructor has been assigned to this class,
-    //the homework has been assigned and the student has submitted this homework.
-    //Add hw3 but students submited hw4 (FALSE)
+    //submit the hw, where the hw doesn't exist
+    //missing "add homework"
     @Test
-    public void HWAdded2(){
-        boolean bool = true;
-        String InstructorName = "";
+    public void assignHW2(){
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
-        InstructorName = this.admin.getClassInstructor("Test", 2017);
-        this.instructor.addHomework(InstructorName, "Test", 2017, "hw3", "Programming");
-        bool = this.student.hasSubmitted("Student", "hw4", "Test", 2017);
-        assertFalse(bool);
+        this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
+        assertFalse(this.instructor.homeworkExists("Test", 2017, "hw3"));
+    }
+
+    //check for future hw that is never been added, year
+    @Test
+    public void assignHW3(){
+        this.admin.createClass("Test", 2017, "Instructor", 50);
+        this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
+        assertFalse(this.instructor.homeworkExists("Test", 2019, "hw3"));
+    }
+
+    //check for hw that is never been added, different hws
+    @Test
+    public void assignHW4(){
+        this.admin.createClass("Test", 2017, "Instructor", 50);
+        this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
+        assertFalse(this.instructor.homeworkExists("Test", 2017, "hw4"));
+    }
+
+    //class doesn't exist
+    @Test
+    public void assignHW5(){
+        this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
+        this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
+        assertFalse(this.instructor.homeworkExists("Test", 2017, "hw3"));
+    }
+
+    //Student graded on the hw
+    @Test
+    public void gradesResult(){
+        int grade = 0;
+        this.admin.createClass("Test", 2017, "Instructor", 50);
+        this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
+        this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
+        this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", 99);
+        grade = this.instructor.getGrade("Test", 2017, "hw3", "Student");
+        assertTrue("grade can't be negative", grade >= 0);
     }
 
     //can't accept negative grades
@@ -88,20 +117,19 @@ public class InstructorTestCases {
         //assertFalse("grade can't be negative", grade < 0);
     }
 
-    //Student graded on the hw
+    //assigne grade to hw doesn't exist
+    //missing "add homework"
     @Test
     public void gradesResult2(){
-        int grade = 0;
+        int grade;
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
-        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
         this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
-        this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", 99);
-        grade = this.instructor.getGrade("Test", 2017, "hw3", "Student");
-        assertTrue("grade can't be negative", grade >= 0);
+        this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", 10);
+        assertNull(this.instructor.getGrade("Test", 2017, "hw3", "Student"));
     }
 
-    //Instructor got a grade before the class created
+    //get a grade from a class created in the past
     @Test
     public void gradesResult3(){
         this.admin.createClass("Test", 2017, "Instructor", 50);
@@ -112,28 +140,37 @@ public class InstructorTestCases {
         assertNull(this.instructor.getGrade("Test", 2016, "hw3", "Student"));
     }
 
-    //submit the hw, where the hw doesn't exist
-    //missing "add homework"
+    //get a grade for a class added in future (2018)
     @Test
-    public void assignHW(){
-        boolean bool = true;
+    public void gradesResult4() {
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor", "Test", 2018, "hw3", "Programming");
         this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
-        bool = this.instructor.homeworkExists("Test", 2017, "hw3");
-        //System.out.println(bool);
-        assertFalse(bool);
+        this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", 99);
+        assertNull(this.instructor.getGrade("Test", 2017, "hw3", "Student"));
     }
 
-    //assigne grade to hw doesn't exist
-    //missing "add homework"
+    //different instructors
     @Test
-    public void assignGrade(){
-        int grade;
+    public void gradesResult5() {
         this.admin.createClass("Test", 2017, "Instructor", 50);
         this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor1", "Test", 2017, "hw3", "Programming");
         this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
-        this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", 10);
+        this.instructor.assignGrade("Instructor2", "Test", 2017, "hw3", "Student", 99);
+        assertNull(this.instructor.getGrade("Test", 2017, "hw3", "Student"));
+    }
+
+    //student not register for the class
+    @Test
+    public void gradesResult6(){
+        int grade = 0;
+        this.admin.createClass("Test", 2017, "Instructor", 50);
+        //this.student.registerForClass("Student", "Test", 2017);
+        this.instructor.addHomework("Instructor", "Test", 2017, "hw3", "Programming");
+        this.student.submitHomework("Student", "hw3", "Programming", "Test", 2017);
+        this.instructor.assignGrade("Instructor", "Test", 2017, "hw3", "Student", 99);
         assertNull(this.instructor.getGrade("Test", 2017, "hw3", "Student"));
     }
 }
