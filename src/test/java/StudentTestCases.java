@@ -84,7 +84,7 @@ public class StudentTestCases {
     }
 
 
-    //the class submitted past year.
+    //the class submitted past year
     @Test
     public void submitHW3(){
         this.admin.createClass("Test", 2017, "Instructor", 22);
